@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/mobile", "destination": "/neptune_crm_mobile.html" },
+    { "source": "/desktop", "destination": "/neptune_crm_desktop.html" }
+  ]
+}
