@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0A0C0F">
+<title>Neptune CRM</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --black:    #0A0C0F;
+  --s1:       #111418;
+  --s2:       #181C22;
+  --s3:       #1E2430;
+  --border:   #252B34;
+  --bmd:      #2E3744;
+  --gold:     #C8952A;
+  --gold-lt:  #D4A843;
+  --gold-dim: rgba(200,149,42,0.13);
+  --gold-ln:  rgba(200,149,42,0.28);
+  --red:      #C0392B;
+  --red-lt:   rgba(192,57,43,0.14);
+  --amber:    #B7760D;
+  --amb-lt:   rgba(183,118,13,0.14);
+  --green:    #16A34A;
+  --grn-lt:   rgba(22,163,74,0.14);
+  --blue:     #1A5C8A;
+  --blu-lt:   rgba(26,92,138,0.14);
+  --text:     #D8DFEA;
+  --tmid:     #7A8899;
+  --tdim:     #3E4A58;
+  --mono:     'JetBrains Mono', monospace;
+  --disp:     'Rajdhani', sans-serif;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{height:100%;overscroll-behavior:none;}
+body{font-family:'Inter',sans-serif;font-size:14px;background:var(--black);color:var(--text);
+  min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;}
+
+/* ── TOPBAR ── */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  height:56px;background:var(--s1);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 16px;gap:12px;
+  padding-top:var(--safe-top);
+}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.5;}
+.brand{display:flex;align-items:center;gap:8px;}
+.brand-icon{width:28px;height:28px;flex-shrink:0;}
+.brand-name{font-family:var(--disp);font-size:18px;font-weight:700;letter-spacing:3px;color:var(--gold-lt);}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.notif-btn{position:relative;width:36px;height:36px;border-radius:8px;
+  background:var(--s2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;
+  background:var(--red);border:2px solid var(--s1);}
+.user-btn{display:flex;align-items:center;gap:8px;
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:100px;padding:4px 10px 4px 4px;cursor:pointer;}
+.u-avatar{width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:var(--black);
+  font-family:var(--disp);letter-spacing:1px;}
+.u-name{font-size:12px;font-weight:500;color:var(--text);}
+.u-role{font-size:10px;color:var(--tmid);font-family:var(--mono);}
+
+/* ── VESSEL STRIP ── */
+.vessel-strip{
+  background:var(--s2);border-bottom:1px solid var(--border);
+  padding:8px 16px;display:flex;align-items:center;gap:16px;overflow-x:auto;
+  scrollbar-width:none;
+}
+.vessel-strip::-webkit-scrollbar{display:none;}
+.vs-item{display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;}
+.vs-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.vs-dot.on{background:#4ADE80;}
+.vs-dot.amber{background:#D4920F;}
+.vs-label{font-size:10px;color:var(--tmid);font-family:var(--mono);}
+.vs-val{font-size:11px;color:var(--text);font-weight:500;font-family:var(--mono);}
+.vs-sep{width:1px;height:14px;background:var(--border);flex-shrink:0;}
+
+/* ── MAIN SCROLL AREA ── */
+.main{flex:1;overflow-y:auto;padding:16px;padding-bottom:calc(72px + var(--safe-bot));
+  display:flex;flex-direction:column;gap:0;
+  -webkit-overflow-scrolling:touch;}
+
+/* ── VIEWS ── */
+.view{display:none;flex-direction:column;gap:14px;}
+.view.active{display:flex;}
+
+/* ── PAGE HEADER ── */
+.ph{margin-bottom:2px;}
+.ph h1{font-family:var(--disp);font-size:20px;font-weight:700;
+  color:var(--gold-lt);letter-spacing:1.5px;text-transform:uppercase;}
+.ph p{font-size:11px;color:var(--tmid);margin-top:2px;font-family:var(--mono);}
+.ph-row{display:flex;align-items:flex-start;justify-content:space-between;}
+.gold-rule{height:1px;background:linear-gradient(90deg,var(--gold),transparent);opacity:.4;}
+
+/* ── ALERT STRIP ── */
+.alert{display:flex;align-items:flex-start;gap:10px;
+  padding:12px 14px;border-radius:8px;border:1px solid;font-size:12px;}
+.alert.red{background:var(--red-lt);border-color:rgba(192,57,43,.3);}
+.alert.amber{background:var(--amb-lt);border-color:rgba(183,118,13,.3);}
+.alert-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.alert-body{flex:1;}
+.alert-title{font-weight:600;color:var(--text);margin-bottom:4px;}
+.alert-title.red{color:#E05C4E;}
+.alert-title.amber{color:#D4920F;}
+.alert-desc{color:var(--tmid);font-size:11px;line-height:1.4;font-family:var(--mono);}
+.alert-actions{display:flex;gap:6px;margin-top:8px;}
+
+/* ── STAT GRID ── */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;
+  padding:14px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card.gold::before{background:var(--gold);}
+.stat-card.red::before{background:var(--red);}
+.stat-card.amber::before{background:var(--amber);}
+.stat-card.green::before{background:#22C55E;}
+.stat-lbl{font-size:9px;font-weight:700;color:var(--tdim);
+  text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono);}
+.stat-val{font-family:var(--disp);font-size:28px;font-weight:700;line-height:1.1;margin:4px 0 2px;}
+.stat-val.gold{color:var(--gold-lt);}
+.stat-val.red{color:#E05C4E;}
+.stat-val.amber{color:#D4920F;}
+.stat-val.green{color:#4ADE80;}
+.stat-sub{font-size:10px;color:var(--tmid);}
+
+/* ── SECTION HEADER ── */
+.sh{font-size:9px;font-weight:700;color:var(--tdim);text-transform:uppercase;
+  letter-spacing:1.2px;font-family:var(--mono);padding-bottom:8px;
+  border-bottom:1px solid var(--border);margin-bottom:10px;}
+
+/* ── CARDS (generic surface) ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.card-head{padding:12px 14px;border-bottom:1px solid var(--border);
+  background:var(--s2);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-family:var(--disp);font-size:13px;font-weight:700;
+  color:var(--gold-lt);letter-spacing:1px;text-transform:uppercase;}
+
+/* ── DEPT STATUS LIST ── */
+.dept-list{padding:2px 0;}
+.dept-row{display:flex;align-items:center;justify-content:space-between;
+  padding:9px 14px;border-bottom:1px solid var(--border);font-size:12px;}
+.dept-row:last-child{border-bottom:none;}
+.dept-row-lbl{color:var(--tmid);}
+
+/* ── CHIPS ── */
+.chip{display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:600;font-family:var(--mono);
+  padding:3px 7px;border-radius:100px;letter-spacing:.2px;}
+.chip::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.chip.green{background:var(--grn-lt);color:#4ADE80;}.chip.green::before{background:#4ADE80;}
+.chip.amber{background:var(--amb-lt);color:#D4920F;}.chip.amber::before{background:#D4920F;}
+.chip.red{background:var(--red-lt);color:#E05C4E;}.chip.red::before{background:#E05C4E;}
+.chip.gold{background:var(--gold-dim);color:var(--gold-lt);}.chip.gold::before{background:var(--gold);}
+.chip.grey{background:rgba(255,255,255,.04);color:var(--tmid);}.chip.grey::before{background:var(--tdim);}
+
+/* ── SIGNATURE QUEUE ── */
+.sig-item{display:flex;align-items:center;gap:12px;
+  padding:12px 14px;border-bottom:1px solid var(--border);}
+.sig-item:last-child{border-bottom:none;}
+.sig-left{flex:1;min-width:0;}
+.sig-doc{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;}
+.sig-meta{font-size:10px;color:var(--tmid);font-family:var(--mono);}
+.sig-right{flex-shrink:0;}
+
+/* ── TASK ITEMS ── */
+.task-list{display:flex;flex-direction:column;gap:8px;}
+.task-item{background:var(--s1);border:1px solid var(--border);border-radius:10px;
+  padding:13px 14px;display:flex;align-items:flex-start;gap:12px;}
+.task-ico{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:16px;flex-shrink:0;}
+.task-ico.gold{background:var(--gold-dim);}
+.task-ico.amber{background:var(--amb-lt);}
+.task-ico.red{background:var(--red-lt);}
+.task-ico.green{background:var(--grn-lt);}
+.task-body{flex:1;min-width:0;}
+.task-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;}
+.task-meta{font-size:10px;color:var(--tmid);font-family:var(--mono);}
+.task-foot{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;
+  border-radius:6px;font-size:12px;font-weight:700;
+  font-family:var(--disp);letter-spacing:.8px;text-transform:uppercase;
+  border:none;cursor:pointer;transition:opacity .12s;white-space:nowrap;
+  min-height:36px;}
+.btn:active{opacity:.7;}
+.btn-gold{background:var(--gold);color:var(--black);}
+.btn-ghost{background:transparent;color:var(--tmid);border:1px solid var(--bmd);}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-sm{padding:5px 10px;font-size:11px;min-height:30px;}
+.btn-full{width:100%;justify-content:center;}
+
+/* ── DELEGATE BUTTON & SHEET ── */
+.del-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;
+  font-size:11px;font-weight:700;font-family:var(--disp);letter-spacing:.5px;
+  text-transform:uppercase;color:var(--gold-lt);background:var(--gold-dim);
+  border:1px solid var(--gold-ln);border-radius:6px;cursor:pointer;}
+
+/* Bottom sheet overlay */
+.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;
+  display:none;align-items:flex-end;}
+.sheet-overlay.open{display:flex;}
+.sheet{background:var(--s1);border-top:1px solid var(--bmd);
+  border-radius:16px 16px 0 0;width:100%;
+  padding-bottom:var(--safe-bot);
+  animation:sheetUp .22s ease;}
+@keyframes sheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.sheet-handle{width:36px;height:4px;background:var(--bmd);border-radius:2px;
+  margin:10px auto 0;}
+.sheet-head{padding:14px 18px 10px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;}
+.sheet-title{font-family:var(--disp);font-size:15px;font-weight:700;
+  color:var(--gold-lt);letter-spacing:1px;text-transform:uppercase;}
+.sheet-close{background:none;border:none;color:var(--tmid);font-size:18px;cursor:pointer;padding:4px;}
+.sheet-body{padding:8px 0;max-height:60vh;overflow-y:auto;}
+.officer-item{display:flex;align-items:center;gap:12px;padding:12px 18px;cursor:pointer;}
+.officer-item:active{background:var(--gold-dim);}
+.o-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:13px;font-weight:700;color:var(--black);
+  font-family:var(--disp);letter-spacing:1px;flex-shrink:0;}
+.o-info{flex:1;}
+.o-name{font-size:13px;font-weight:500;color:var(--text);}
+.o-role{font-size:11px;color:var(--tmid);font-family:var(--mono);}
+.o-avail{font-size:11px;font-weight:600;font-family:var(--mono);}
+.o-avail.on{color:#4ADE80;}.o-avail.off{color:var(--tdim);}
+
+/* ── WORKFLOW STEPS ── */
+.wf-step{display:flex;align-items:flex-start;gap:12px;
+  padding:12px 14px;border-bottom:1px solid var(--border);}
+.wf-step:last-child{border-bottom:none;}
+.step-num{width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;font-family:var(--disp);flex-shrink:0;margin-top:1px;}
+.step-num.done{background:var(--green);color:#fff;}
+.step-num.active-step{background:var(--gold);color:var(--black);}
+.step-num.alert-step{background:var(--red);color:#fff;}
+.step-num.pending{background:var(--bmd);color:var(--tdim);}
+.step-content{flex:1;}
+.step-actor{font-size:10px;font-weight:700;color:var(--gold);
+  text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px;font-family:var(--mono);}
+.step-desc{font-size:12px;color:var(--tmid);line-height:1.4;}
+.auto-tag{display:inline-flex;align-items:center;gap:3px;font-size:10px;
+  font-weight:600;color:#4ADE80;font-family:var(--mono);margin-top:4px;}
+.gate-tag{display:inline-flex;align-items:center;gap:3px;font-size:10px;
+  font-weight:600;color:#D4920F;font-family:var(--mono);margin-top:4px;}
+
+/* ── FORM ELEMENTS ── */
+.form-group{margin-bottom:14px;}
+.form-lbl{display:block;font-size:10px;font-weight:700;color:var(--tdim);
+  text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;font-family:var(--mono);}
+.form-select,.form-input,.form-textarea{
+  width:100%;padding:11px 12px;border:1px solid var(--bmd);
+  border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;
+  color:var(--text);background:var(--s2);
+  appearance:none;-webkit-appearance:none;}
+.form-select:focus,.form-input:focus,.form-textarea:focus{
+  outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,149,42,.1);}
+.form-select option{background:var(--s2);}
+.form-textarea{resize:vertical;min-height:80px;}
+.priority-row{display:flex;gap:8px;}
+.pri-opt{flex:1;padding:9px;border:1px solid var(--bmd);border-radius:8px;
+  text-align:center;font-size:12px;font-weight:700;font-family:var(--disp);
+  letter-spacing:.5px;text-transform:uppercase;cursor:pointer;color:var(--tmid);}
+.pri-opt.sel-low{border-color:#4ADE80;color:#4ADE80;background:var(--grn-lt);}
+.pri-opt.sel-med{border-color:var(--gold);color:var(--gold-lt);background:var(--gold-dim);}
+.pri-opt.sel-hi{border-color:#E05C4E;color:#E05C4E;background:var(--red-lt);}
+
+/* ── DATA TABLE (scrollable on mobile) ── */
+.table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+.dt{width:100%;border-collapse:collapse;min-width:500px;}
+.dt thead th{font-size:10px;font-weight:700;color:var(--tdim);
+  text-transform:uppercase;letter-spacing:.6px;font-family:var(--mono);
+  text-align:left;padding:9px 12px;background:var(--s2);
+  border-bottom:1px solid var(--border);white-space:nowrap;}
+.dt tbody td{padding:11px 12px;font-size:12px;border-bottom:1px solid var(--border);
+  color:var(--text);vertical-align:middle;}
+.dt tbody tr:last-child td{border-bottom:none;}
+.dt tbody tr:active{background:var(--s2);}
+
+/* ── MODAL (full screen on mobile) ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;
+  display:none;flex-direction:column;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--s1);flex:1;overflow-y:auto;
+  padding:0 0 var(--safe-bot);}
+.modal-topbar{position:sticky;top:0;background:var(--s1);
+  border-bottom:1px solid var(--border);padding:14px 16px;
+  display:flex;align-items:center;gap:12px;z-index:10;}
+.modal-topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.4;}
+.modal-back{background:none;border:none;color:var(--tmid);font-size:20px;cursor:pointer;padding:4px;}
+.modal-topbar-title{font-family:var(--disp);font-size:16px;font-weight:700;
+  color:var(--gold-lt);letter-spacing:1px;text-transform:uppercase;}
+.modal-body{padding:20px 16px;}
+
+/* ── AVAILABILITY GRID ── */
+.avail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.avail-card{background:var(--s2);border:1px solid var(--border);border-radius:8px;
+  padding:12px;display:flex;align-items:center;gap:10px;}
+.avail-card .o-avatar{width:34px;height:34px;font-size:12px;}
+.avail-card .o-name{font-size:12px;font-weight:500;color:var(--text);}
+.avail-card .o-role{font-size:10px;color:var(--tmid);font-family:var(--mono);}
+.avail-tasks{font-size:10px;color:var(--tdim);font-family:var(--mono);margin-top:2px;}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:var(--s1);border-top:1px solid var(--border);
+  display:flex;align-items:stretch;
+  padding-bottom:var(--safe-bot);
+}
+.bottom-nav::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.3;}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:8px 4px;cursor:pointer;border:none;background:none;gap:3px;
+  color:var(--tdim);transition:color .1s;}
+.nav-tab.active{color:var(--gold);}
+.nav-tab-icon{font-size:18px;line-height:1;}
+.nav-tab-label{font-size:9px;font-weight:700;font-family:var(--mono);
+  letter-spacing:.4px;text-transform:uppercase;}
+.nav-badge-wrap{position:relative;display:inline-flex;}
+.nb{position:absolute;top:-4px;right:-8px;background:var(--red);color:#fff;
+  font-size:9px;font-weight:700;padding:1px 4px;border-radius:100px;
+  font-family:var(--mono);}
+
+/* ── MORE MENU (slide-up) ── */
+.more-menu{background:var(--s1);border-top:1px solid var(--bmd);
+  border-radius:16px 16px 0 0;width:100%;
+  padding:0 0 var(--safe-bot);}
+.more-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);}
+.more-item{background:var(--s1);padding:18px 16px;display:flex;flex-direction:column;
+  align-items:center;gap:6px;cursor:pointer;}
+.more-item:active{background:var(--gold-dim);}
+.more-icon{font-size:22px;}
+.more-label{font-size:11px;font-weight:600;color:var(--text);font-family:var(--disp);
+  letter-spacing:.5px;text-transform:uppercase;}
+
+/* ── TOAST ── */
+.toast-ctr{position:fixed;top:70px;left:16px;right:16px;z-index:999;display:flex;
+  flex-direction:column;gap:7px;pointer-events:none;}
+.toast{background:var(--s2);border:1px solid var(--bmd);color:var(--text);
+  padding:12px 14px;border-radius:10px;font-size:13px;
+  display:flex;align-items:center;gap:8px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+  animation:toastIn .2s ease;pointer-events:auto;}
+.toast.success{border-color:rgba(74,222,128,.3);}
+.t-icon{font-size:15px;}
+@keyframes toastIn{from{transform:translateY(-8px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+/* ── PULL TO REFRESH INDICATOR ── */
+.ptr{text-align:center;padding:12px;font-size:11px;color:var(--tdim);
+  font-family:var(--mono);letter-spacing:.5px;}
+
+/* ── EMPTY STATE ── */
+.empty{padding:40px 20px;text-align:center;color:var(--tdim);font-size:13px;}
+
+@media(min-width:768px){
+  .stat-grid{grid-template-columns:repeat(4,1fr);}
+  .avail-grid{grid-template-columns:repeat(3,1fr);}
+  .main{padding:24px;padding-bottom:24px;}
+  .bottom-nav{display:none;}
+  /* Desktop: sidebar */
+  body{flex-direction:row;}
+  .desktop-sidebar{display:flex!important;}
+  .topbar{position:sticky;}
+  .vessel-strip{display:none;}
+  .main-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .main{overflow-y:auto;flex:1;}
+}
+
+.desktop-sidebar{
+  display:none;
+  width:200px;flex-shrink:0;
+  background:var(--s1);border-right:1px solid var(--border);
+  flex-direction:column;padding:14px 0;overflow-y:auto;
+}
+.ds-group{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--tdim);
+  text-transform:uppercase;padding:12px 16px 4px;font-family:var(--mono);}
+.ds-item{display:flex;align-items:center;gap:10px;padding:9px 16px;
+  font-size:13px;font-weight:400;color:var(--tmid);cursor:pointer;
+  border-left:2px solid transparent;transition:all .1s;}
+.ds-item:hover{background:var(--s2);color:var(--text);}
+.ds-item.active{background:var(--gold-dim);color:var(--gold-lt);
+  font-weight:500;border-left-color:var(--gold);}
+.ds-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
+.ds-badge{margin-left:auto;font-size:10px;font-weight:700;font-family:var(--mono);
+  padding:1px 6px;border-radius:100px;}
+.ds-badge.red{background:var(--red-lt);color:#E05C4E;}
+.ds-badge.amber{background:var(--amb-lt);color:#D4920F;}
+</style>
+</head>
+<body>
+
+<!-- DESKTOP SIDEBAR -->
+<nav class="desktop-sidebar" id="desktopSidebar">
+  <div class="ds-group">Overview</div>
+  <div class="ds-item active" onclick="showView('dashboard',this,'◈')"><span class="ds-icon">◈</span>Dashboard</div>
+  <div class="ds-group">My Tasks</div>
+  <div class="ds-item" onclick="showView('tasks',this,'✦')"><span class="ds-icon">✦</span>Task Queue<span class="ds-badge red">3</span></div>
+  <div class="ds-item" onclick="showView('delegate',this,'↗')"><span class="ds-icon">↗</span>Delegate</div>
+  <div class="ds-group">Workflows</div>
+  <div class="ds-item" onclick="showView('ptw',this,'⬡')"><span class="ds-icon">⬡</span>Permits to Work<span class="ds-badge amber">1</span></div>
+  <div class="ds-item" onclick="showView('pms',this,'⚙')"><span class="ds-icon">⚙</span>Maintenance</div>
+  <div class="ds-item" onclick="showView('eorb',this,'▣')"><span class="ds-icon">▣</span>Oil Record Book</div>
+  <div class="ds-item" onclick="showView('provisions',this,'◎')"><span class="ds-icon">◎</span>Provisions</div>
+  <div class="ds-group">Documents</div>
+  <div class="ds-item" onclick="showView('port',this,'⚑')"><span class="ds-icon">⚑</span>Port Documents</div>
+</nav>
+
+<div class="main-wrap" style="flex:1;display:flex;flex-direction:column;">
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="brand">
+    <svg class="brand-icon" viewBox="0 0 60 60" fill="none">
+      <circle cx="30" cy="30" r="22" stroke="#C8952A" stroke-width="1.5" opacity=".5"/>
+      <polygon points="30,4 33,26 30,23 27,26" fill="#C8952A"/>
+      <polygon points="30,56 33,34 30,37 27,34" fill="#C8952A"/>
+      <polygon points="4,30 26,27 23,30 26,33" fill="#C8952A"/>
+      <polygon points="56,30 34,27 37,30 34,33" fill="#C8952A"/>
+      <path d="M14 30 Q30 16 46 30 Q30 44 14 30Z" fill="#0A0C0F" stroke="#C8952A" stroke-width="1.2"/>
+      <circle cx="30" cy="30" r="7" fill="#C8952A" opacity=".9"/>
+      <circle cx="30" cy="30" r="4" fill="#0A0C0F"/>
+      <circle cx="28" cy="28" r="1.5" fill="#D4A843" opacity=".8"/>
+    </svg>
+    <span class="brand-name">Neptune</span>
+  </div>
+  <div class="topbar-right">
+    <div class="notif-btn" onclick="showView('tasks',null,'✦')">
+      🔔<div class="notif-dot"></div>
+    </div>
+    <div class="user-btn" onclick="switchUser()">
+      <div class="u-avatar" id="uAvatar" style="background:#C8952A">AT</div>
+      <div>
+        <div class="u-name" id="uName">A. Torres</div>
+        <div class="u-role" id="uRole">Chief Mate</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- VESSEL STRIP (mobile) -->
+<div class="vessel-strip">
+  <div class="vs-item"><div class="vs-dot on"></div><span class="vs-label">VSAT</span><span class="vs-val">ONLINE</span></div>
+  <div class="vs-sep"></div>
+  <div class="vs-item"><span class="vs-label">VESSEL</span><span class="vs-val">MV ATLANTIC PIONEER</span></div>
+  <div class="vs-sep"></div>
+  <div class="vs-item"><span class="vs-label">ETA SANTOS</span><span class="vs-val">38 HRS</span></div>
+  <div class="vs-sep"></div>
+  <div class="vs-item"><div class="vs-dot on"></div><span class="vs-label">SPEED</span><span class="vs-val">14.2 KN</span></div>
+  <div class="vs-sep"></div>
+  <div class="vs-item"><span class="vs-label">UTC</span><span class="vs-val" id="utcClock">14:32</span></div>
+</div>
+
+<!-- MAIN -->
+<main class="main" id="mainScroll">
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div id="view-dashboard" class="view active">
+    <div class="ph-row">
+      <div class="ph"><h1>Command</h1><p>FRI 26 JUN 2026 · EN ROUTE SANTOS</p></div>
+    </div>
+    <div class="gold-rule"></div>
+
+    <div class="alert" style="background:var(--red-lt);border-color:rgba(192,57,43,.3)">
+      <span class="alert-icon">▲</span>
+      <div class="alert-body">
+        <div class="alert-title red">Action Required</div>
+        <div class="alert-desc">PTW #0047 — Enclosed Space Entry awaiting Master signature. Work is blocked.</div>
+        <div class="alert-actions">
+          <button class="btn btn-danger btn-sm" onclick="showView('ptw',null,'⬡')">View PTW</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card gold"><div class="stat-lbl">Voyage</div><div class="stat-val gold">On Track</div><div class="stat-sub">Santos ETA 38 hrs</div></div>
+      <div class="stat-card amber"><div class="stat-lbl">My Tasks</div><div class="stat-val amber">3</div><div class="stat-sub">1 overdue</div></div>
+      <div class="stat-card red"><div class="stat-lbl">Sign-offs</div><div class="stat-val red">3</div><div class="stat-sub">PTW · NOR · eORB</div></div>
+      <div class="stat-card green"><div class="stat-lbl">PMS</div><div class="stat-val green">96%</div><div class="stat-sub">Compliance</div></div>
+    </div>
+
+    <div class="sh">Department Status</div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">⬡ Deck</span><span class="chip amber">1 open PTW</span></div>
+      <div class="dept-list">
+        <div class="dept-row"><span class="dept-row-lbl">Voyage Plan</span><span class="chip green">Signed</span></div>
+        <div class="dept-row"><span class="dept-row-lbl">PTW #0047</span><span class="chip red">Awaiting Master</span></div>
+        <div class="dept-row"><span class="dept-row-lbl">Stability</span><span class="chip green">Within limits</span></div>
+        <div class="dept-row"><span class="dept-row-lbl">Fire drill</span><span class="chip amber">Due in 3 days</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">⚙ Engine</span><span class="chip green">All clear</span></div>
+      <div class="dept-list">
+        <div class="dept-row"><span class="dept-row-lbl">Main Engine</span><span class="chip green">88 RPM normal</span></div>
+        <div class="dept-row"><span class="dept-row-lbl">eORB #44</span><span class="chip amber">Needs countersign</span></div>
+        <div class="dept-row"><span class="dept-row-lbl">Spares PO-291</span><span class="chip amber">Shore pending</span></div>
+        <div class="dept-row"><span class="dept-row-lbl">Bilge pump PM</span><span class="chip green">Done 24 Jun</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">◎ Catering</span><span class="chip amber">1 alert</span></div>
+      <div class="dept-list">
+        <div class="dept-row"><span class="dept-row-lbl">MLC Hygiene</span><span class="chip green">Cleared</span></div>
+        <div class="dept-row"><span class="dept-row-lbl">Freezer #2</span><span class="chip amber">−14°C (above limit)</span></div>
+        <div class="dept-row"><span class="dept-row-lbl">Potable water</span><span class="chip green">0.3 ppm Cl₂ ✓</span></div>
+        <div class="dept-row"><span class="dept-row-lbl">Provisions</span><span class="chip green">18 days</span></div>
+      </div>
+    </div>
+
+    <div class="sh">Signature Queue</div>
+    <div class="card">
+      <div class="sig-item">
+        <div class="sig-left">
+          <div class="sig-doc">PTW #0047 — Enclosed Space Entry</div>
+          <div class="sig-meta">CHIEF MATE TORRES · 14:11 UTC · SAFETY CRITICAL</div>
+        </div>
+        <div class="sig-right"><button class="btn btn-gold btn-sm" onclick="toast('PTW #0047 signed.','success')">Sign</button></div>
+      </div>
+      <div class="sig-item">
+        <div class="sig-left">
+          <div class="sig-doc">NOR — Santos arrival</div>
+          <div class="sig-meta">AUTO-COMPILED · 13:45 UTC · PORT DOCS</div>
+        </div>
+        <div class="sig-right"><button class="btn btn-gold btn-sm" onclick="toast('NOR signed and transmitted.','success')">Sign</button></div>
+      </div>
+      <div class="sig-item">
+        <div class="sig-left">
+          <div class="sig-doc">eORB #44 — Bunkering 25 Jun</div>
+          <div class="sig-meta">CHIEF ENG. NWOSU · 09:30 UTC · MARPOL</div>
+        </div>
+        <div class="sig-right"><button class="btn btn-gold btn-sm" onclick="toast('eORB #44 countersigned.','success')">Sign</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TASKS ═══ -->
+  <div id="view-tasks" class="view">
+    <div class="ph-row">
+      <div class="ph"><h1>Task Queue</h1><p>YOUR ASSIGNED TASKS</p></div>
+      <button class="btn btn-gold btn-sm" onclick="openModal('assignModal')" style="margin-top:4px">+ Assign</button>
+    </div>
+    <div class="gold-rule"></div>
+
+    <div class="sh">Overdue</div>
+    <div class="task-list">
+      <div class="task-item">
+        <div class="task-ico red">🦺</div>
+        <div class="task-body">
+          <div class="task-title">Fire &amp; boat drill — monthly ISM</div>
+          <div class="task-meta">DUE 23 JUN · ISM SCHEDULE · YOU</div>
+          <div class="task-foot">
+            <span class="chip red">3 days overdue</span>
+            <button class="del-btn" onclick="openSheet('drillSheet')">Delegate ▾</button>
+            <button class="btn btn-ghost btn-sm">Start</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sh" style="margin-top:14px">Due Today</div>
+    <div class="task-list">
+      <div class="task-item">
+        <div class="task-ico amber">⬡</div>
+        <div class="task-body">
+          <div class="task-title">PTW #0047 — Close after inspection</div>
+          <div class="task-meta">DUE 17:00 UTC · AWAITING MASTER AUTH</div>
+          <div class="task-foot">
+            <span class="chip amber">Pending auth</span>
+            <button class="btn btn-ghost btn-sm" onclick="showView('ptw',null,'⬡')">View PTW</button>
+          </div>
+        </div>
+      </div>
+      <div class="task-item">
+        <div class="task-ico gold">📦</div>
+        <div class="task-body">
+          <div class="task-title">Cargo pre-arrival — Santos stow review</div>
+          <div class="task-meta">DUE 20:00 UTC · VOYAGE PLANNING</div>
+          <div class="task-foot">
+            <span class="chip gold">In progress</span>
+            <button class="del-btn" onclick="openSheet('cargoSheet')">Delegate ▾</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sh" style="margin-top:14px">Upcoming</div>
+    <div class="task-list">
+      <div class="task-item">
+        <div class="task-ico green">🧼</div>
+        <div class="task-body">
+          <div class="task-title">Pre-arrival hygiene audit — Santos</div>
+          <div class="task-meta">DUE 27 JUN · AUTO-TRIGGERED 48 HR BEFORE ETA</div>
+          <div class="task-foot">
+            <span class="chip grey">Upcoming</span>
+            <button class="del-btn" onclick="openSheet('hygieneSheet')">Delegate ▾</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DELEGATE ═══ -->
+  <div id="view-delegate" class="view">
+    <div class="ph"><h1>Delegate</h1><p>ASSIGN TASKS TO YOUR TEAM</p></div>
+    <div class="gold-rule"></div>
+    <button class="btn btn-gold btn-full" onclick="openModal('assignModal')">+ Create &amp; Assign Task</button>
+
+    <div class="sh">Officer Availability</div>
+    <div class="avail-grid">
+      <div class="avail-card">
+        <div class="o-avatar" style="background:#1A5C8A">WC</div>
+        <div><div class="o-name">W. Chen</div><div class="o-role">2nd Mate</div><div class="avail-tasks"><span style="color:#4ADE80">● On watch</span> · 2 tasks</div></div>
+      </div>
+      <div class="avail-card">
+        <div class="o-avatar" style="background:#5B2D8A">MR</div>
+        <div><div class="o-name">M. Reyes</div><div class="o-role">3rd Mate</div><div class="avail-tasks"><span style="color:#4ADE80">● On duty</span> · 1 task</div></div>
+      </div>
+      <div class="avail-card">
+        <div class="o-avatar" style="background:#1A7A4A">PD</div>
+        <div><div class="o-name">P. Diaz</div><div class="o-role">Bosun</div><div class="avail-tasks"><span style="color:var(--tdim)">● Off watch</span> · 1 task</div></div>
+      </div>
+      <div class="avail-card">
+        <div class="o-avatar" style="background:#1A5C8A">KP</div>
+        <div><div class="o-name">K. Park</div><div class="o-role">2nd Engineer</div><div class="avail-tasks"><span style="color:#4ADE80">● On watch</span> · 3 tasks</div></div>
+      </div>
+      <div class="avail-card">
+        <div class="o-avatar" style="background:#1A7A4A">LM</div>
+        <div><div class="o-name">L. Mensah</div><div class="o-role">3rd Engineer</div><div class="avail-tasks"><span style="color:#4ADE80">● On duty</span> · 1 task</div></div>
+      </div>
+      <div class="avail-card">
+        <div class="o-avatar" style="background:#7A4A1A">JS</div>
+        <div><div class="o-name">J. Santos</div><div class="o-role">Chf. Steward</div><div class="avail-tasks"><span style="color:#4ADE80">● On duty</span> · 1 task</div></div>
+      </div>
+    </div>
+
+    <div class="sh">Delegated Tasks</div>
+    <div class="task-list">
+      <div class="task-item">
+        <div class="o-avatar" style="background:#1A5C8A;width:36px;height:36px;font-size:12px;border-radius:8px;flex-shrink:0">WC</div>
+        <div class="task-body"><div class="task-title">Anchor watch log 00:00–04:00</div><div class="task-meta">W. CHEN · 2ND MATE · DUE TONIGHT</div></div>
+        <span class="chip gold">Active</span>
+      </div>
+      <div class="task-item">
+        <div class="o-avatar" style="background:#5B2D8A;width:36px;height:36px;font-size:12px;border-radius:8px;flex-shrink:0">MR</div>
+        <div class="task-body"><div class="task-title">Lifeboat weekly check — SB</div><div class="task-meta">M. REYES · 3RD MATE · DUE 28 JUN</div></div>
+        <span class="chip grey">Soon</span>
+      </div>
+      <div class="task-item">
+        <div class="o-avatar" style="background:#1A7A4A;width:36px;height:36px;font-size:12px;border-radius:8px;flex-shrink:0">PD</div>
+        <div class="task-body"><div class="task-title">Mooring equipment inspection</div><div class="task-meta">P. DIAZ · BOSUN · DONE 25 JUN</div></div>
+        <span class="chip green">Done</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PTW ═══ -->
+  <div id="view-ptw" class="view">
+    <div class="ph-row">
+      <div class="ph"><h1>Permits to Work</h1><p>HIGH-RISK AUTHORIZATION</p></div>
+      <button class="btn btn-gold btn-sm" onclick="openModal('ptwModal')" style="margin-top:4px">+ New</button>
+    </div>
+    <div class="gold-rule"></div>
+    <div class="alert" style="background:var(--red-lt);border-color:rgba(192,57,43,.3)">
+      <span class="alert-icon">▲</span>
+      <div class="alert-body">
+        <div class="alert-title red">PTW #0047</div>
+        <div class="alert-desc">Checklist complete — work blocked until Master authorizes.</div>
+        <div class="alert-actions">
+          <button class="btn btn-ghost btn-sm" onclick="toast('Reminder sent to Master.','success')">Remind Master</button>
+        </div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="dt">
+        <thead><tr><th>PTW #</th><th>Type</th><th>Location</th><th>Status</th><th>Assigned</th></tr></thead>
+        <tbody>
+          <tr><td style="font-family:var(--mono)">#0047</td><td>Enclosed Space</td><td>BT 3P</td><td><span class="chip red">Awaiting Master</span></td>
+            <td><button class="del-btn" onclick="openSheet('ptwSheet')">Reassign ▾</button></td></tr>
+          <tr><td style="font-family:var(--mono)">#0046</td><td>Hot Work</td><td>Foc'sle Deck</td><td><span class="chip green">Closed</span></td><td>W. Chen</td></tr>
+          <tr><td style="font-family:var(--mono)">#0045</td><td>Working Aloft</td><td>Radar Mast</td><td><span class="chip green">Closed</span></td><td>M. Reyes</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="sh">PTW #0047 Progress</div>
+    <div class="card">
+      <div class="wf-step"><div class="step-num done">✓</div><div class="step-content"><div class="step-actor">Chief Mate · Initiated</div><div class="step-desc">PTW created — Enclosed Space Entry, Ballast Tank 3P</div></div></div>
+      <div class="wf-step"><div class="step-num done">✓</div><div class="step-content"><div class="step-actor">System Gate · Checklist</div><div class="step-desc">All 8 safety checks cleared — gas, O₂, ventilation, standby crew</div><div><span class="auto-tag">✓ Complete</span></div></div></div>
+      <div class="wf-step"><div class="step-num alert-step">!</div><div class="step-content"><div class="step-actor">Master · Authorization</div><div class="step-desc">Digital signature required before work begins</div><div><span class="gate-tag">⚠ Work is blocked here</span></div></div></div>
+      <div class="wf-step"><div class="step-num pending">4</div><div class="step-content"><div class="step-actor">P. Diaz · Execute</div><div class="step-desc">Carry out inspection once authorized</div></div></div>
+      <div class="wf-step"><div class="step-num pending">5</div><div class="step-content"><div class="step-actor">Chief Mate · Close</div><div class="step-desc">Close PTW — auto-logged to PMS and shore</div><div><span class="auto-tag">⚡ Auto-sync on closure</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ PMS ═══ -->
+  <div id="view-pms" class="view">
+    <div class="ph-row">
+      <div class="ph"><h1>Maintenance</h1><p>PLANNED MAINTENANCE SYSTEM</p></div>
+      <button class="btn btn-gold btn-sm" onclick="openModal('taskModal')" style="margin-top:4px">+ Log</button>
+    </div>
+    <div class="gold-rule"></div>
+    <div class="stat-grid">
+      <div class="stat-card amber"><div class="stat-lbl">Due This Week</div><div class="stat-val amber">4</div><div class="stat-sub">1 unassigned</div></div>
+      <div class="stat-card green"><div class="stat-lbl">Done This Month</div><div class="stat-val green">18</div><div class="stat-sub">On time</div></div>
+      <div class="stat-card amber"><div class="stat-lbl">Open POs</div><div class="stat-val amber">1</div><div class="stat-sub">Shore pending</div></div>
+      <div class="stat-card red"><div class="stat-lbl">Low Stock</div><div class="stat-val red">1</div><div class="stat-sub">ME O-Ring 95mm</div></div>
+    </div>
+    <div class="sh">Tasks</div>
+    <div class="task-list">
+      <div class="task-item">
+        <div class="task-ico gold">🔩</div>
+        <div class="task-body">
+          <div class="task-title">ME cylinder overhaul — cyl. 4</div>
+          <div class="task-meta">8,500 RUN HRS · DUE 30 JUN</div>
+          <div class="task-foot"><span class="chip amber">Scheduled</span><button class="del-btn" onclick="openSheet('pmsSheet1')">K. Park ▾</button></div>
+        </div>
+      </div>
+      <div class="task-item">
+        <div class="task-ico gold">⚙</div>
+        <div class="task-body">
+          <div class="task-title">Aux engine fuel filter — AE#2</div>
+          <div class="task-meta">500 RUN HRS · DUE 2 JUL</div>
+          <div class="task-foot"><span class="chip grey">Upcoming</span><button class="del-btn" onclick="openSheet('pmsSheet2')">L. Mensah ▾</button></div>
+        </div>
+      </div>
+      <div class="task-item">
+        <div class="task-ico red">⚠</div>
+        <div class="task-body">
+          <div class="task-title">Bilge pump annual overhaul</div>
+          <div class="task-meta">ANNUAL CALENDAR · DUE 15 JUL</div>
+          <div class="task-foot"><span class="chip red">Unassigned</span><button class="del-btn" onclick="openSheet('pmsSheet2')">Assign ▾</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ eORB ═══ -->
+  <div id="view-eorb" class="view">
+    <div class="ph-row">
+      <div class="ph"><h1>Oil Record Book</h1><p>MARPOL ANNEX I</p></div>
+      <button class="btn btn-gold btn-sm" onclick="openModal('eorbModal')" style="margin-top:4px">+ Entry</button>
+    </div>
+    <div class="gold-rule"></div>
+    <div class="table-wrap">
+      <table class="dt">
+        <thead><tr><th>Entry #</th><th>Date</th><th>Operation</th><th>Qty</th><th>CE</th><th>Master</th></tr></thead>
+        <tbody>
+          <tr><td style="font-family:var(--mono)">#044</td><td style="font-family:var(--mono)">25 Jun</td><td>Bunkering IFO 380</td><td>420 MT</td><td><span class="chip green">✓</span></td><td><span class="chip red">Pending</span></td></tr>
+          <tr><td style="font-family:var(--mono)">#043</td><td style="font-family:var(--mono)">22 Jun</td><td>Bilge (OWS)</td><td>1.8 m³</td><td><span class="chip green">✓</span></td><td><span class="chip green">✓</span></td></tr>
+          <tr><td style="font-family:var(--mono)">#042</td><td style="font-family:var(--mono)">18 Jun</td><td>Sludge shore</td><td>3.2 MT</td><td><span class="chip green">✓</span></td><td><span class="chip green">✓</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ PROVISIONS ═══ -->
+  <div id="view-provisions" class="view">
+    <div class="ph"><h1>Provisions</h1><p>VICTUALING · COLD STORAGE · SLOP CHEST</p></div>
+    <div class="gold-rule"></div>
+    <div class="alert amber">
+      <span class="alert-icon">⚠</span>
+      <div class="alert-body">
+        <div class="alert-title amber">Freezer #2 Alert</div>
+        <div class="alert-desc">Temperature at −14°C — above −18°C threshold. Engine room notified.</div>
+        <div class="alert-actions"><button class="btn btn-ghost btn-sm" onclick="openModal('correctiveModal')">Log Action</button></div>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card green"><div class="stat-lbl">Provisions</div><div class="stat-val green">18d</div><div class="stat-sub">Santos in 38 hrs</div></div>
+      <div class="stat-card green"><div class="stat-lbl">Freezer #1</div><div class="stat-val green">−18°C</div><div class="stat-sub">Normal</div></div>
+      <div class="stat-card amber"><div class="stat-lbl">Freezer #2</div><div class="stat-val amber">−14°C</div><div class="stat-sub">Above threshold</div></div>
+      <div class="stat-card green"><div class="stat-lbl">Water Cl₂</div><div class="stat-val green">0.3</div><div class="stat-sub">ppm — OK</div></div>
+    </div>
+    <div class="sh">Provisioning Tasks</div>
+    <div class="task-list">
+      <div class="task-item">
+        <div class="task-ico amber">📦</div>
+        <div class="task-body">
+          <div class="task-title">Santos chandler order — review &amp; approve</div>
+          <div class="task-meta">AUTO-GENERATED FROM MENU · DUE BEFORE ARRIVAL</div>
+          <div class="task-foot">
+            <button class="del-btn" onclick="openSheet('stewSheet')">Assign ▾</button>
+            <button class="btn btn-ghost btn-sm">Review</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sh">Slop Chest</div>
+    <div class="table-wrap">
+      <table class="dt">
+        <thead><tr><th>Crew</th><th>Items</th><th>Deducted</th></tr></thead>
+        <tbody>
+          <tr><td>A. Diallo</td><td>Toiletries ×3</td><td style="font-family:var(--mono)">$12.50</td></tr>
+          <tr><td>R. Tamayo</td><td>T-shirts ×2</td><td style="font-family:var(--mono)">$28.00</td></tr>
+          <tr><td>F. Osei</td><td>Tobacco ×1</td><td style="font-family:var(--mono)">$9.00</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ PORT DOCS ═══ -->
+  <div id="view-port" class="view">
+    <div class="ph-row">
+      <div class="ph"><h1>Port Documents</h1><p>SANTOS, BRAZIL · ETA 38 HRS</p></div>
+      <button class="btn btn-gold btn-sm" onclick="toast('All signed docs transmitted to Wilsons Santos.','success')" style="margin-top:4px">Transmit</button>
+    </div>
+    <div class="gold-rule"></div>
+    <div class="task-list">
+      <div class="task-item">
+        <div class="task-ico amber">📄</div>
+        <div class="task-body">
+          <div class="task-title">Notice of Readiness (NOR)</div>
+          <div class="task-meta">AUTO-POPULATED FROM VOYAGE PLAN + ETA</div>
+          <div class="task-foot"><span class="chip amber">Needs Master sig</span><button class="btn btn-gold btn-sm" onclick="toast('NOR sent for signing.','success')">Send</button></div>
+        </div>
+      </div>
+      <div class="task-item">
+        <div class="task-ico gold">📄</div>
+        <div class="task-body">
+          <div class="task-title">Statement of Facts (SOF)</div>
+          <div class="task-meta">PORT TIMESTAMPS · DRAFT — ETA NOT YET REACHED</div>
+          <div class="task-foot"><span class="chip grey">Draft</span><button class="btn btn-ghost btn-sm">Preview</button></div>
+        </div>
+      </div>
+      <div class="task-item">
+        <div class="task-ico green">📄</div>
+        <div class="task-body">
+          <div class="task-title">General Declaration</div>
+          <div class="task-meta">CREW LIST · CARGO · DRAFT — AUTO-COMPILED</div>
+          <div class="task-foot"><span class="chip green">Ready</span><button class="btn btn-ghost btn-sm">Review</button></div>
+        </div>
+      </div>
+      <div class="task-item">
+        <div class="task-ico green">📄</div>
+        <div class="task-body">
+          <div class="task-title">Crew List (IMO FAL 5)</div>
+          <div class="task-meta">CREW DATABASE — AUTO-COMPILED</div>
+          <div class="task-foot"><span class="chip green">Ready</span><button class="btn btn-ghost btn-sm">Review</button></div>
+        </div>
+      </div>
+      <div class="task-item">
+        <div class="task-ico green">📄</div>
+        <div class="task-body">
+          <div class="task-title">Stores Declaration (IMO FAL 3)</div>
+          <div class="task-meta">INVENTORY MODULE — AUTO-COMPILED</div>
+          <div class="task-foot"><span class="chip green">Ready</span><button class="btn btn-ghost btn-sm">Review</button></div>
+        </div>
+      </div>
+      <div class="task-item">
+        <div class="task-ico green">📄</div>
+        <div class="task-body">
+          <div class="task-title">Dangerous Goods Declaration</div>
+          <div class="task-meta">CARGO MANIFEST (IMDG) — AUTO-COMPILED</div>
+          <div class="task-foot"><span class="chip green">Ready</span><button class="btn btn-ghost btn-sm">Review</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main><!-- /main -->
+
+<!-- BOTTOM NAV (mobile only) -->
+<nav class="bottom-nav">
+  <button class="nav-tab active" onclick="showView('dashboard',this,'◈')" id="tab-dashboard">
+    <span class="nav-tab-icon">◈</span>
+    <span class="nav-tab-label">Home</span>
+  </button>
+  <button class="nav-tab" onclick="showView('tasks',this,'✦')" id="tab-tasks">
+    <span class="nav-tab-icon">
+      <span class="nav-badge-wrap">✦<span class="nb">3</span></span>
+    </span>
+    <span class="nav-tab-label">Tasks</span>
+  </button>
+  <button class="nav-tab" onclick="showView('ptw',this,'⬡')" id="tab-ptw">
+    <span class="nav-tab-icon">
+      <span class="nav-badge-wrap">⬡<span class="nb">1</span></span>
+    </span>
+    <span class="nav-tab-label">PTW</span>
+  </button>
+  <button class="nav-tab" onclick="showView('delegate',this,'↗')" id="tab-delegate">
+    <span class="nav-tab-icon">↗</span>
+    <span class="nav-tab-label">Delegate</span>
+  </button>
+  <button class="nav-tab" onclick="openMoreMenu()" id="tab-more">
+    <span class="nav-tab-icon">⋯</span>
+    <span class="nav-tab-label">More</span>
+  </button>
+</nav>
+
+</div><!-- /main-wrap -->
+
+<!-- ── BOTTOM SHEETS (delegate) ── -->
+<!-- Generic officer sheet -->
+<div class="sheet-overlay" id="drillSheet" onclick="closeSheet('drillSheet')">
+  <div class="sheet" onclick="e=>e.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <span class="sheet-title">Assign Fire Drill</span>
+      <button class="sheet-close" onclick="closeSheet('drillSheet')">✕</button>
+    </div>
+    <div class="sheet-body" id="sheetOfficers-drill"></div>
+  </div>
+</div>
+<div class="sheet-overlay" id="cargoSheet" onclick="closeSheet('cargoSheet')">
+  <div class="sheet" onclick="e=>e.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><span class="sheet-title">Assign Cargo Check</span><button class="sheet-close" onclick="closeSheet('cargoSheet')">✕</button></div>
+    <div class="sheet-body" id="sheetOfficers-cargo"></div>
+  </div>
+</div>
+<div class="sheet-overlay" id="hygieneSheet" onclick="closeSheet('hygieneSheet')">
+  <div class="sheet" onclick="e=>e.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><span class="sheet-title">Assign Hygiene Audit</span><button class="sheet-close" onclick="closeSheet('hygieneSheet')">✕</button></div>
+    <div class="sheet-body" id="sheetOfficers-hygiene"></div>
+  </div>
+</div>
+<div class="sheet-overlay" id="ptwSheet" onclick="closeSheet('ptwSheet')">
+  <div class="sheet" onclick="e=>e.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><span class="sheet-title">Reassign Work Team</span><button class="sheet-close" onclick="closeSheet('ptwSheet')">✕</button></div>
+    <div class="sheet-body" id="sheetOfficers-ptw"></div>
+  </div>
+</div>
+<div class="sheet-overlay" id="pmsSheet1" onclick="closeSheet('pmsSheet1')">
+  <div class="sheet" onclick="e=>e.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><span class="sheet-title">Reassign PMS Task</span><button class="sheet-close" onclick="closeSheet('pmsSheet1')">✕</button></div>
+    <div class="sheet-body" id="sheetOfficers-pms1"></div>
+  </div>
+</div>
+<div class="sheet-overlay" id="pmsSheet2" onclick="closeSheet('pmsSheet2')">
+  <div class="sheet" onclick="e=>e.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><span class="sheet-title">Assign PMS Task</span><button class="sheet-close" onclick="closeSheet('pmsSheet2')">✕</button></div>
+    <div class="sheet-body" id="sheetOfficers-pms2"></div>
+  </div>
+</div>
+<div class="sheet-overlay" id="stewSheet" onclick="closeSheet('stewSheet')">
+  <div class="sheet" onclick="e=>e.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><span class="sheet-title">Assign Task</span><button class="sheet-close" onclick="closeSheet('stewSheet')">✕</button></div>
+    <div class="sheet-body" id="sheetOfficers-stew"></div>
+  </div>
+</div>
+
+<!-- MORE MENU -->
+<div class="sheet-overlay" id="moreMenu" onclick="closeSheet('moreMenu')">
+  <div class="more-menu" onclick="e=>e.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="more-grid">
+      <div class="more-item" onclick="showView('pms',null,'⚙');closeSheet('moreMenu')"><span class="more-icon">⚙</span><span class="more-label">Maintenance</span></div>
+      <div class="more-item" onclick="showView('eorb',null,'▣');closeSheet('moreMenu')"><span class="more-icon">▣</span><span class="more-label">Oil Record</span></div>
+      <div class="more-item" onclick="showView('provisions',null,'◎');closeSheet('moreMenu')"><span class="more-icon">◎</span><span class="more-label">Provisions</span></div>
+      <div class="more-item" onclick="showView('port',null,'⚑');closeSheet('moreMenu')"><span class="more-icon">⚑</span><span class="more-label">Port Docs</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODALS (full screen) ── -->
+<!-- Assign Task -->
+<div class="modal-overlay" id="assignModal">
+  <div class="modal">
+    <div class="modal-topbar">
+      <button class="modal-back" onclick="closeModal('assignModal')">‹</button>
+      <span class="modal-topbar-title">Assign Task</span>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-lbl">Task type</label>
+        <select class="form-select"><option>Select workflow…</option><option>Voyage Plan Draft</option><option>Permit to Work — Enclosed Space</option><option>Permit to Work — Hot Work</option><option>Cargo Inspection</option><option>Safety Check</option><option>Fire and Boat Drill</option><option>Stability Calculation</option><option>Engine Room Readings</option><option>PMS Task</option><option>eORB Entry</option><option>Hygiene Audit</option><option>Slop Chest Issue</option><option>Custom Task</option></select>
+      </div>
+      <div class="form-group"><label class="form-lbl">Assign to</label>
+        <select class="form-select"><option>Select officer…</option>
+          <optgroup label="Deck"><option>W. Chen — 2nd Mate (On watch)</option><option>M. Reyes — 3rd Mate (On duty)</option><option>P. Diaz — Bosun (Off watch)</option></optgroup>
+          <optgroup label="Engine"><option>K. Park — 2nd Engineer (On watch)</option><option>L. Mensah — 3rd Engineer (On duty)</option></optgroup>
+          <optgroup label="Catering"><option>J. Santos — Chief Steward (On duty)</option></optgroup>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-lbl">Due date / time</label><input type="datetime-local" class="form-input"></div>
+      <div class="form-group"><label class="form-lbl">Priority</label>
+        <div class="priority-row">
+          <div class="pri-opt" onclick="setPri(this,'low')">Low</div>
+          <div class="pri-opt sel-med" onclick="setPri(this,'med')">Medium</div>
+          <div class="pri-opt" onclick="setPri(this,'hi')">High</div>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-lbl">Notes</label><textarea class="form-textarea" placeholder="Specific instructions…"></textarea></div>
+      <button class="btn btn-gold btn-full" onclick="closeModal('assignModal');toast('Task assigned successfully.','success')">Assign Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- New PTW -->
+<div class="modal-overlay" id="ptwModal">
+  <div class="modal">
+    <div class="modal-topbar">
+      <button class="modal-back" onclick="closeModal('ptwModal')">‹</button>
+      <span class="modal-topbar-title">New PTW</span>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-lbl">Work type</label>
+        <select class="form-select"><option>Select…</option><option>Enclosed Space Entry</option><option>Hot Work</option><option>Working Aloft</option><option>Electrical Isolation</option><option>Diving Operations</option></select>
+      </div>
+      <div class="form-group"><label class="form-lbl">Location on vessel</label><input class="form-input" placeholder="e.g. Ballast Tank 3P…"></div>
+      <div class="form-group"><label class="form-lbl">Work team lead</label>
+        <select class="form-select"><option>Select officer…</option><option>W. Chen — 2nd Mate</option><option>M. Reyes — 3rd Mate</option><option>P. Diaz — Bosun</option><option>K. Park — 2nd Engineer</option></select>
+      </div>
+      <div class="form-group"><label class="form-lbl">Planned start</label><input type="datetime-local" class="form-input"></div>
+      <div class="form-group"><label class="form-lbl">Description of work</label><textarea class="form-textarea" placeholder="Briefly describe the work…"></textarea></div>
+      <button class="btn btn-gold btn-full" onclick="closeModal('ptwModal');toast('PTW #0048 created — complete safety checklist to proceed.','success')">Create PTW</button>
+    </div>
+  </div>
+</div>
+
+<!-- Corrective Action -->
+<div class="modal-overlay" id="correctiveModal">
+  <div class="modal">
+    <div class="modal-topbar">
+      <button class="modal-back" onclick="closeModal('correctiveModal')">‹</button>
+      <span class="modal-topbar-title">Corrective Action</span>
+    </div>
+    <div class="modal-body">
+      <div class="alert amber" style="margin-bottom:16px">
+        <span class="alert-icon">⚠</span>
+        <div class="alert-body"><div class="alert-title amber">Freezer #2 — −14°C</div><div class="alert-desc">Above −18°C threshold since 13:22 UTC</div></div>
+      </div>
+      <div class="form-group"><label class="form-lbl">Action taken</label><textarea class="form-textarea" placeholder="Describe corrective action…"></textarea></div>
+      <div class="form-group"><label class="form-lbl">Engine room notified?</label>
+        <select class="form-select"><option>Yes — compressor being investigated</option><option>No — monitoring only</option></select>
+      </div>
+      <div class="form-group"><label class="form-lbl">Stock moved to Freezer #1?</label>
+        <select class="form-select"><option>Yes</option><option>No — not critical yet</option></select>
+      </div>
+      <button class="btn btn-gold btn-full" onclick="closeModal('correctiveModal');toast('Corrective action logged and timestamped.','success')">Submit Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- eORB -->
+<div class="modal-overlay" id="eorbModal">
+  <div class="modal">
+    <div class="modal-topbar">
+      <button class="modal-back" onclick="closeModal('eorbModal')">‹</button>
+      <span class="modal-topbar-title">New eORB Entry</span>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-lbl">Operation type</label>
+        <select class="form-select"><option>Select…</option><option>Bunkering</option><option>Bilge water discharge (OWS)</option><option>Sludge transfer to shore</option><option>Oil transfer between tanks</option></select>
+      </div>
+      <div class="form-group"><label class="form-lbl">Date and time (UTC)</label><input type="datetime-local" class="form-input"></div>
+      <div class="form-group"><label class="form-lbl">Quantity (metric tonnes)</label><input type="number" class="form-input" placeholder="0.00"></div>
+      <div class="form-group"><label class="form-lbl">Notes</label><textarea class="form-textarea" placeholder="Barge name, tank numbers, remarks…"></textarea></div>
+      <button class="btn btn-gold btn-full" onclick="closeModal('eorbModal');toast('eORB entry submitted for CE signature.','success')">Submit for Signing</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-ctr" id="toastCtr"></div>
+
+<script>
+// ── OFFICERS DATA ──
+const OFFICERS = [
+  {i:'WC',n:'W. Chen',  r:'2nd Mate',      c:'#1A5C8A', avail:'on',  status:'On watch'},
+  {i:'MR',n:'M. Reyes', r:'3rd Mate',      c:'#5B2D8A', avail:'on',  status:'On duty'},
+  {i:'PD',n:'P. Diaz',  r:'Bosun',         c:'#1A7A4A', avail:'off', status:'Off watch'},
+  {i:'KP',n:'K. Park',  r:'2nd Engineer',  c:'#1A5C8A', avail:'on',  status:'On watch'},
+  {i:'LM',n:'L. Mensah',r:'3rd Engineer',  c:'#1A7A4A', avail:'on',  status:'On duty'},
+  {i:'JS',n:'J. Santos',r:'Chief Steward', c:'#7A4A1A', avail:'on',  status:'On duty'},
+];
+
+// populate all officer sheets
+const sheetConfigs = {
+  drill:   [0,1,2],
+  cargo:   [0,1],
+  hygiene: [5],
+  ptw:     [0,2],
+  pms1:    [3,4],
+  pms2:    [3,4],
+  stew:    [5],
+};
+Object.entries(sheetConfigs).forEach(([key,idxs])=>{
+  const el = document.getElementById('sheetOfficers-'+key);
+  if(!el) return;
+  idxs.forEach(i=>{
+    const o = OFFICERS[i];
+    el.innerHTML += `<div class="officer-item" onclick="pickOfficer('${o.n}','${key}')">
+      <div class="o-avatar" style="background:${o.c}">${o.i}</div>
+      <div class="o-info">
+        <div class="o-name">${o.n}</div>
+        <div class="o-role">${o.r}</div>
+      </div>
+      <span class="o-avail ${o.avail}">${o.status}</span>
+    </div>`;
+  });
+});
+
+function pickOfficer(name, sheetKey){
+  closeSheet(sheetKey+'Sheet');
+  toast('Task assigned to '+name+'.','success');
+}
+
+// ── VIEW SWITCHING ──
+function showView(id, el, icon){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.getElementById('mainScroll').scrollTop = 0;
+
+  // update bottom nav
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  const tab = document.getElementById('tab-'+id);
+  if(tab) tab.classList.add('active');
+
+  // update desktop sidebar
+  document.querySelectorAll('.ds-item').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ds-item').forEach(t=>{
+    if(t.textContent.includes(icon||'')) t.classList.add('active');
+  });
+}
+
+// ── SHEETS ──
+function openSheet(id){ document.getElementById(id).classList.add('open'); }
+function closeSheet(id){ document.getElementById(id).classList.remove('open'); }
+
+// ── MORE MENU ──
+function openMoreMenu(){ openSheet('moreMenu'); }
+
+// ── MODALS ──
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// ── PRIORITY ──
+function setPri(el, level){
+  el.parentElement.querySelectorAll('.pri-opt').forEach(s=>{
+    s.className='pri-opt';
+  });
+  el.classList.add('sel-'+level);
+}
+
+// ── TOAST ──
+function toast(msg, type){
+  const c = document.getElementById('toastCtr');
+  const t = document.createElement('div');
+  t.className = 'toast'+(type?' '+type:'');
+  t.innerHTML = `<span class="t-icon">${type==='success'?'✓':'◈'}</span>${msg}`;
+  c.appendChild(t);
+  setTimeout(()=>t.remove(), 3000);
+}
+
+// ── UTC CLOCK ──
+function updateClock(){
+  const now = new Date();
+  const h = String(now.getUTCHours()).padStart(2,'0');
+  const m = String(now.getUTCMinutes()).padStart(2,'0');
+  const el = document.getElementById('utcClock');
+  if(el) el.textContent = h+':'+m;
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// ── USER SWITCHER ──
+const USERS = [
+  {i:'AT',n:'A. Torres', r:'Chief Mate',     c:'#C8952A'},
+  {i:'KN',n:'K. Nwosu',  r:'Chief Engineer', c:'#1A7A4A'},
+  {i:'JS',n:'J. Santos', r:'Chief Steward',  c:'#7A4A1A'},
+  {i:'RP',n:'R. Petrov', r:'Master',         c:'#5B2D8A'},
+];
+let ui=0;
+function switchUser(){
+  ui=(ui+1)%USERS.length;
+  const u=USERS[ui];
+  document.getElementById('uAvatar').textContent=u.i;
+  document.getElementById('uAvatar').style.background=u.c;
+  document.getElementById('uName').textContent=u.n;
+  document.getElementById('uRole').textContent=u.r;
+  toast('Switched to '+u.r+' view.');
+}
+
+// ── SWIPE TO GO BACK (modals) ──
+let touchStartY=0;
+document.querySelectorAll('.modal').forEach(m=>{
+  m.addEventListener('touchstart',e=>{ touchStartY=e.touches[0].clientY; });
+  m.addEventListener('touchmove',e=>{
+    if(m.scrollTop===0 && e.touches[0].clientY - touchStartY > 60){
+      const overlay = m.closest('.modal-overlay');
+      if(overlay) overlay.classList.remove('open');
+    }
+  });
+});
+</script>
+</body>
+</html>
